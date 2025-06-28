@@ -14,6 +14,8 @@ A beautiful, minimalist picker wheel application built with vanilla JavaScript. 
 - 📱 **Responsive** - Works perfectly on desktop, tablet, and mobile
 - 🎨 **Color Coded** - Each option gets a unique color from curated palette
 
+  ## 👀 **View It Live at -> https://quantum-spin.vercel.app/ 
+
 ## 🚀 Quick Start
 
 1. **Clone or Download**
