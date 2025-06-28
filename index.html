@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumSpin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        body.dark {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e2e8f0;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .container {
+            background: rgba(26, 32, 44, 0.95);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.dark h1 {
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            font-weight: 400;
+        }
+
+        body.dark .subtitle {
+            color: #94a3b8;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        body.dark .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .wheel-container {
+            position: relative;
+            margin: 30px auto;
+            display: inline-block;
+        }
+
+        .wheel {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid #ff6b6b;
+            z-index: 10;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            margin-top: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        input {
+            flex: 1;
+            max-width: 200px;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        body.dark input {
+            background: #2d3748;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        body.dark input:focus {
+            border-color: #60a5fa;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .add-btn {
+            background: #48bb78;
+            color: white;
+        }
+
+        .add-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .spin-btn {
+            background: #667eea;
+            color: white;
+            padding: 16px 32px;
+            font-size: 18px;
+            margin: 10px;
+        }
+
+        .spin-btn:hover:not(:disabled) {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .spin-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .options-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: #f7fafc;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        body.dark .option-item {
+            background: #2d3748;
+        }
+
+        .option-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .remove-btn {
+            background: #f56565;
+            color: white;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+
+        .remove-btn:hover {
+            background: #e53e3e;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0fff4;
+            border-radius: 10px;
+            border-left: 4px solid #48bb78;
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .result {
+            background: #1a2e1a;
+            border-left-color: #68d391;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .empty-state {
+            color: #a0aec0;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        body.dark .empty-state {
+            color: #718096;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        body.dark .footer {
+            border-top-color: #4a5568;
+            color: #94a3b8;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #5a67d8;
+            text-decoration: underline;
+        }
+
+        body.dark .footer a {
+            color: #60a5fa;
+        }
+
+        body.dark .footer a:hover {
+            color: #93c5fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>QuantumSpin</h1>
+            <p class="subtitle">Advanced decision making with style</p>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                <span id="themeIcon">🌙</span>
+            </button>
+        </div>
+        
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="wheelCanvas" class="wheel" width="280" height="280"></canvas>
+            <div class="center-circle"></div>
+        </div>
+
+        <div class="controls">
+            <div class="input-group">
+                <input type="text" id="optionInput" placeholder="Enter an option..." maxlength="20">
+                <button class="add-btn" onclick="addOption()">Add</button>
+            </div>
+            
+            <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN</button>
+            
+            <div class="result" id="result">
+                <strong>Result: </strong><span id="resultText"></span>
+            </div>
+        </div>
+
+        <div class="options-list" id="optionsList">
+            <div class="empty-state">Add some options to get started!</div>
+        </div>
+
+        <footer class="footer">
+            <p>Created by <a href="https://github.com/Zyox-dev" target="_blank">@Zyox-dev</a> • <a href="https://zyox.carrd.co/" target="_blank">Portfolio</a></p>
+        </footer>
+    </div>
+
+    <script>
+        let options = [];
+        let isSpinning = false;
+        let currentRotation = 0;
+
+        const colors = [
+            '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57',
+            '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43',
+            '#10ac84', '#ee5253', '#0abde3', '#3742fa', '#2ed573'
+        ];
+
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const wheel = document.querySelector('.wheel');
+
+        function drawWheel() {
+            if (options.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const isDark = document.body.classList.contains('dark');
+                ctx.fillStyle = isDark ? '#2d3748' : '#e2e8f0';
+                ctx.beginPath();
+                ctx.arc(140, 140, 140, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.fillStyle = isDark ? '#718096' : '#a0aec0';
+                ctx.font = '16px -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Add options', 140, 140);
+                return;
+            }
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 140;
+            const anglePerOption = (2 * Math.PI) / options.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            options.forEach((option, index) => {
+                const startAngle = index * anglePerOption - Math.PI / 2;
+                const endAngle = startAngle + anglePerOption;
+
+                // Draw segment
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = colors[index % colors.length];
+                ctx.fill();
+
+                // Draw border
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw text
+                const textAngle = startAngle + anglePerOption / 2;
+                const textX = centerX + Math.cos(textAngle) * (radius * 0.7);
+                const textY = centerY + Math.sin(textAngle) * (radius * 0.7);
+
+                ctx.save();
+                ctx.translate(textX, textY);
+                ctx.rotate(textAngle + Math.PI / 2);
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 14px -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(option.text, 0, 0);
+                ctx.restore();
+            });
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            const themeIcon = document.getElementById('themeIcon');
+            themeIcon.textContent = isDark ? '☀️' : '🌙';
+            
+            // Redraw wheel with new theme colors
+            drawWheel();
+            
+            // Save theme preference
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('darkMode');
+            if (savedTheme === 'true') {
+                document.body.classList.add('dark');
+                document.getElementById('themeIcon').textContent = '☀️';
+            }
+        }
+
+        function addOption() {
+            const input = document.getElementById('optionInput');
+            const text = input.value.trim();
+            
+            if (text && !options.find(opt => opt.text === text)) {
+                options.push({
+                    text: text,
+                    color: colors[options.length % colors.length]
+                });
+                input.value = '';
+                updateDisplay();
+            }
+        }
+
+        function removeOption(index) {
+            options.splice(index, 1);
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            drawWheel();
+            updateOptionsList();
+            updateSpinButton();
+        }
+
+        function updateOptionsList() {
+            const list = document.getElementById('optionsList');
+            
+            if (options.length === 0) {
+                list.innerHTML = '<div class="empty-state">Add some options to get started!</div>';
+                return;
+            }
+
+            list.innerHTML = options.map((option, index) => `
+                <div class="option-item">
+                    <div style="display: flex; align-items: center;">
+                        <div class="option-color" style="background-color: ${option.color}"></div>
+                        <span>${option.text}</span>
+                    </div>
+                    <button class="remove-btn" onclick="removeOption(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function updateSpinButton() {
+            const spinBtn = document.getElementById('spinBtn');
+            spinBtn.disabled = options.length < 2 || isSpinning;
+        }
+
+        function spin() {
+            if (options.length < 2 || isSpinning) return;
+
+            isSpinning = true;
+            document.getElementById('result').classList.remove('show');
+            updateSpinButton();
+
+            const spinAngle = Math.random() * 360 + 1440; // At least 4 full rotations
+            currentRotation += spinAngle;
+            
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                const normalizedRotation = currentRotation % 360;
+                const anglePerOption = 360 / options.length;
+                const selectedIndex = Math.floor((360 - normalizedRotation + anglePerOption / 2) / anglePerOption) % options.length;
+                
+                showResult(options[selectedIndex].text);
+                isSpinning = false;
+                updateSpinButton();
+            }, 4000);
+        }
+
+        function showResult(result) {
+            document.getElementById('resultText').textContent = result;
+            document.getElementById('result').classList.add('show');
+        }
+
+        // Event listeners
+        document.getElementById('optionInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addOption();
+            }
+        });
+
+        // Initialize
+        loadTheme();
+        drawWheel();
+        updateSpinButton();
+    </script>
+</body>
+</html>
